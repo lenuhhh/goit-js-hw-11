@@ -1,42 +1,19 @@
-export { createMarkup, addMarkup };
-const gallery = document.querySelector('.gallery');
+export function renderUsers(photos, photoList) {
+    const markup = photos
+        .map((photo) => {
+            return `<li class="imgAdded">
+                <a href="${photo.largeImageURL}" class="gallery-item"> 
+                    <img src="${photo.webformatURL}" alt="${photo.tags}" width="360" height="152">
+                </a>
+                <div class="descr">
+                    <p><b>Likes</b> ${photo.likes}</p>
+                    <p><b>Views</b> ${photo.views}</p>
+                    <p><b>Comments</b> ${photo.comments}</p>
+                    <p><b>Downloads</b> ${photo.downloads}</p>
+                </div>
+            </li>`;
+        })
+        .join("");
 
-function createMarkup(images){
- 
-const imageGallary = images
-.map(function({webformatURL, largeImageURL, tags, likes, views, comments, downloads})
-    { return(`  <li class="gallery-item">
-   <a href="${largeImageURL}">
-     <img 
-         class="gallery-image"
-         src="${webformatURL}" alt ="${tags}"/>
-     </a>
-   <ul class="info-box">
-     <li class="image-info">
-       <p class="info-name">Likes</p>
-       <p class="info-value">${likes}</p>
-     </li>
-     <li class="image-info">
-       <p class="info-name">Views</p>
-       <p class="info-value">${views}</p>
-     </li>
-     <li class="image-info">
-       <p class="info-name">Comments</p>
-       <p class="info-value">${comments}</p>
-     </li>
-     <li class="image-info">
-       <p class="info-name">Downloads</p>
-       <p class="info-value">${downloads}</p>
-     </li>
-   </ul>
-   </li>
-`)
-})
-  .join(``);
-  
-return imageGallary
-}
-
-function addMarkup(string){
-    gallery.innerHTML= string;
+    photoList.insertAdjacentHTML("beforeend", markup);
 }
