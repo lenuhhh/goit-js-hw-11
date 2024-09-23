@@ -1,78 +1,57 @@
-import {createMarkup, addMarkup } from "./js/render-functions";
-import fetchPhotos from "./js/pixabay-api";
-import errorSvg from './img/error.svg'
-import iziToast from 'izitoast';
-import simpleLightbox from "simplelightbox";
+import iziToast from "izitoast";
+import "izitoast/dist/css/iziToast.min.css";
 
+import SimpleLightbox from "simplelightbox";
+import "simplelightbox/dist/simple-lightbox.min.css";
 
-const form = document.querySelector('form')
-const loader = document.querySelector('.loader-css')
-const galleryLook = new simpleLightbox('.gallery a')
+// Инициализация SimpleLightbox
+const lightbox = new SimpleLightbox('.list-img a');
 
+const formNew = document.querySelector(".formImg");
+const photoList = document.querySelector(".list-img");
+const loading = document.querySelector(".loader");
+const inputSearch = document.getElementById("search-img");
 
-form.addEventListener("submit", submitHandler)
+import { renderUsers } from './js/render-functions.js'; // Функция рендеринга
+import { fetchPhotos } from './js/pixabay-api.js'; // Запрос на API
 
-function submitHandler(event){
-    event.preventDefault()
-    let searchPrase = event.currentTarget.elements.search.value;
-    if (searchPrase.trim() === '')
-    {
-        const note = "Empty input"
-        invokeNotification(note)
-        }
-    else {
-        fetchPhotos(searchPrase)
-        .then((response) => {
-           const photosObject = responseCheck(response)
-                    return photosObject
+formNew.addEventListener("submit", (event) => {
+    event.preventDefault();
+    
+    photoList.innerHTML = ""; // Очистка галереи перед новым поиском
+    loading.classList.remove("visually-hidden"); // Показываем спиннер
+
+    const query = inputSearch.value.trim();
+    if (query !== "") {
+        fetchPhotos(query)
+            .then((photos) => {
+                loading.classList.add("visually-hidden"); // Скрываем спиннер
+                if (photos.length > 0) {
+                    renderUsers(photos, photoList); // Рендерим фото
+                    lightbox.refresh(); // Обновляем SimpleLightbox
+                } else {
+                    iziToast.error({
+                        title: 'Error',
+                        message: 'Sorry, there are no images matching your search query. Please try again!',
+                        position: 'topRight'
+                    });
+                }
             })
-        .then(({total, hits}) => { 
-            totalCheck(total,hits)
-        })
-        .catch((error) => console.log(error));
-        loader.classList.add("loader")
-        }  
-        
-    form.reset()
-}
-
-function totalCheck(total,hits){
-    if (total>0){
-        let imageGallary = createMarkup(hits)
-        addMarkup(imageGallary);
-        galleryLook.refresh()
-       } 
-           else{
-       const note = "Sorry, there are no images matching your search query. Please try again!"
-       const startMarkup = `<li><span class="loader-css"></span></li>`;
-       addMarkup(startMarkup);
-       invokeNotification(note)
-       }
-}
-
-function responseCheck(response){
-    if (!response.ok) {
-        throw new Error(response.status);
-        }
-        let photosObject;
-            return photosObject = response.json()
+            .catch((error) => {
+                loading.classList.add("visually-hidden");
+                iziToast.error({
+                    title: 'Error',
+                    message: 'Error fetching images. Try again later.',
+                    position: 'topRight'
+                });
+                console.error(error);
+            });
+    } else {
+        loading.classList.add("visually-hidden");
+        iziToast.error({
+            title: 'Error',
+            message: 'Please enter a search term!',
+            position: 'topRight'
+        });
     }
-
-function invokeNotification(message){
-    (iziToast.error({
-        timeout:'5000',
-        messageColor:'#ffffff',
-        titleColor:"#fff",
-        titleSize:"16",
-        titleLineHeight:'24',
-        message: message,
-        iconUrl: errorSvg,
-        iconColor:'#fff',
-        backgroundColor:'#EF4040',
-        progressBarColor:"#B51B1B",
-        position:'topRight',
-        messageSize:'16',
-        messageLineHeight:'24',
-        maxWidth:'432px'
-    }));
-}
+});
