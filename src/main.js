@@ -12,23 +12,23 @@ const photoList = document.querySelector(".list-img");
 const loading = document.querySelector(".loader");
 const inputSearch = document.getElementById("search-img");
 
-import { renderUsers } from './js/render-functions.js'; // Функция рендеринга
-import { fetchPhotos } from './js/pixabay-api.js'; // Запрос на API
+import { renderUsers } from './js/render-functions.js'; 
+import { fetchPhotos } from './js/pixabay-api.js';
 
 formNew.addEventListener("submit", (event) => {
     event.preventDefault();
     
-    photoList.innerHTML = ""; // Очистка галереи перед новым поиском
-    loading.classList.remove("visually-hidden"); // Показываем спиннер
+    photoList.innerHTML = ""; 
+    loading.classList.remove("visually-hidden"); 
 
     const query = inputSearch.value.trim();
     if (query !== "") {
         fetchPhotos(query)
             .then((photos) => {
-                loading.classList.add("visually-hidden"); // Скрываем спиннер
+                loading.classList.add("visually-hidden"); 
                 if (photos.length > 0) {
-                    renderUsers(photos, photoList); // Рендерим фото
-                    lightbox.refresh(); // Обновляем SimpleLightbox
+                    renderUsers(photos, photoList); 
+                    lightbox.refresh();
                 } else {
                     iziToast.error({
                         title: 'Error',
